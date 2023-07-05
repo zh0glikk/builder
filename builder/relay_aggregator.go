@@ -19,6 +19,7 @@ type RemoteRelayAggregator struct {
 }
 
 func NewRemoteRelayAggregator(primary IRelay, secondary []IRelay) *RemoteRelayAggregator {
+	log.Info(fmt.Sprintf("relay: %v", primary.Config().Endpoint))
 	relays := []IRelay{primary}
 	return &RemoteRelayAggregator{
 		relays: append(relays, secondary...),
