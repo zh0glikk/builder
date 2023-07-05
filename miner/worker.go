@@ -1548,6 +1548,7 @@ func (w *worker) generateWork(params *generateParams) (*types.Block, *big.Int, e
 
 	blockBundles, allBundles, usedSbundles, err := w.fillTransactionsSelectAlgo(nil, work)
 	if err != nil {
+		log.Info(fmt.Sprintf("fillTransactionsSelectAlgo err :%s", err.Error()))
 		return nil, nil, err
 	}
 	log.Info("fillTransactionsSelectAlgo applied")
