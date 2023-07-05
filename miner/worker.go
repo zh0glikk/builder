@@ -1364,22 +1364,29 @@ func (w *worker) fillTransactions(interrupt *int32, env *environment) ([]types.S
 			return nil, nil, errors.New("no bundles to apply")
 		}
 
-		log.Info("Commiting bundle", "ethToCoinbase", ethIntToFloat(resultingBundle.TotalEth), "gasUsed", resultingBundle.TotalGasUsed, "bundleScore", resultingBundle.MevGasPrice, "bundleLength", len(bundleTxs), "numBundles", numBundles, "worker", w.flashbots.maxMergedBundles)
+		log.Info("Commiting bundle", "worker", w.flashbots.maxMergedBundles)
 
 		if err := w.commitBundle(env, bundleTxs, interrupt); err != nil {
 			return nil, nil, err
 		}
+
+		log.Info("Commited bundle", "worker", w.flashbots.maxMergedBundles)
+
 		blockBundles = mergedBundles
 		env.profit.Add(env.profit, resultingBundle.EthSentToCoinbase)
 	}
 
 	if len(localTxs) > 0 {
+		log.Info("local tx >0 ", "worker", w.flashbots.maxMergedBundles)
+
 		txs := types.NewTransactionsByPriceAndNonce(env.signer, localTxs, nil, nil, env.header.BaseFee)
 		if err := w.commitTransactions(env, txs, interrupt); err != nil {
 			return nil, nil, err
 		}
 	}
 	if len(remoteTxs) > 0 {
+		log.Info("remote tx >0 ", "worker", w.flashbots.maxMergedBundles)
+
 		txs := types.NewTransactionsByPriceAndNonce(env.signer, remoteTxs, nil, nil, env.header.BaseFee)
 		if err := w.commitTransactions(env, txs, interrupt); err != nil {
 			return nil, nil, err
