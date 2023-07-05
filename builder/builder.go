@@ -395,6 +395,7 @@ func (b *Builder) runBuildingJob(slotCtx context.Context, proposerPubkey phase0.
 	ctx, cancel := context.WithTimeout(slotCtx, 12*time.Second)
 	defer cancel()
 
+	log.Info("building block runner started")
 	// Submission queue for the given payload attributes
 	// multiple jobs can run for different attributes fot the given slot
 	// 1. When new block is ready we check if its profit is higher than profit of last best block

@@ -1332,15 +1332,6 @@ func (w *worker) fillTransactions(interrupt *int32, env *environment) ([]types.S
 	// Fill the block with all available pending transactions.
 	pending := w.eth.TxPool().Pending(true)
 
-	amount := 0
-	for key, value := range pending {
-		if amount == 0 {
-			log.Info(fmt.Sprintf("tx poll txs: %s %v", key, value))
-		}
-		amount += 1
-	}
-	log.Info(fmt.Sprintf("amount of txs from tx pool %v", amount))
-
 	localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
 	for _, account := range w.eth.TxPool().Locals() {
 		if txs := remoteTxs[account]; len(txs) > 0 {
@@ -1372,6 +1363,9 @@ func (w *worker) fillTransactions(interrupt *int32, env *environment) ([]types.S
 		if len(bundleTxs) == 0 {
 			return nil, nil, errors.New("no bundles to apply")
 		}
+
+		log.Info("Commiting bundle", "ethToCoinbase", ethIntToFloat(resultingBundle.TotalEth), "gasUsed", resultingBundle.TotalGasUsed, "bundleScore", resultingBundle.MevGasPrice, "bundleLength", len(bundleTxs), "numBundles", numBundles, "worker", w.flashbots.maxMergedBundles)
+
 		if err := w.commitBundle(env, bundleTxs, interrupt); err != nil {
 			return nil, nil, err
 		}
@@ -1402,16 +1396,6 @@ func (w *worker) fillTransactionsAlgoWorker(interrupt *int32, env *environment) 
 	// Split the pending transactions into locals and remotes
 	// Fill the block with all available pending transactions.
 	pending := w.eth.TxPool().Pending(true)
-
-	amount := 0
-	for key, value := range pending {
-		if amount == 0 {
-			log.Info("tx poll txs", []interface{}{key, value}...)
-			// fmt.Println(key, value)
-		}
-		amount += 1
-	}
-	log.Info("amount of txs from tx pool", []interface{}{"v", amount})
 
 	bundlesToConsider, sbundlesToConsider, err := w.getSimulatedBundles(env)
 	if err != nil {
@@ -1769,7 +1753,7 @@ func (w *worker) generateFlashbotsBundle(env *environment, bundles []types.MevBu
 }
 
 func (w *worker) mergeBundles(env *environment, bundles []simulatedBundle, pendingTxs map[common.Address]types.Transactions) (types.Transactions, simulatedBundle, []types.SimulatedBundle, int, error) {
-	log.Info("worker")
+	log.Info("mergeBundles woekr")
 	mergedBundles := []types.SimulatedBundle{}
 	finalBundle := types.Transactions{}
 
