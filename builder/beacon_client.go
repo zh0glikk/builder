@@ -96,7 +96,7 @@ func (m *MultiBeaconClient) getProposerForNextSlot(requestedSlot uint64) (Pubkey
 	for _, c := range m.clients {
 		pk, err := c.getProposerForNextSlot(requestedSlot)
 		if err != nil {
-			allErrs = errors.Join(allErrs, err)
+			allErrs = errors.New(err.Error())
 			continue
 		}
 
@@ -116,7 +116,7 @@ func (m *MultiBeaconClient) Start() error {
 	for _, c := range m.clients {
 		err := c.Start()
 		if err != nil {
-			allErrs = errors.Join(allErrs, err)
+			allErrs = errors.New(err.Error())
 		}
 	}
 	return allErrs
