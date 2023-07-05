@@ -956,7 +956,7 @@ func (w *worker) updateSnapshot(env *environment) {
 }
 
 func (w *worker) commitTransaction(env *environment, tx *types.Transaction) ([]*types.Log, error) {
-	log.Info("committing tx", []interface{}{"hash", tx.Hash().String()})
+	// log.Info("committing tx", []interface{}{"hash", tx.Hash().String()})
 	gasPool := *env.gasPool
 	envGasUsed := env.header.GasUsed
 	stateDB := env.state
@@ -1008,7 +1008,7 @@ func (w *worker) commitTransaction(env *environment, tx *types.Transaction) ([]*
 }
 
 func (w *worker) commitBundle(env *environment, txs types.Transactions, interrupt *int32) error {
-	log.Info("committing bundle", []interface{}{"len", txs.Len()})
+	// log.Info("committing bundle", []interface{}{"len", txs.Len()})
 	gasLimit := env.header.GasLimit
 	if env.gasPool == nil {
 		env.gasPool = new(core.GasPool).AddGas(gasLimit)
@@ -1335,12 +1335,11 @@ func (w *worker) fillTransactions(interrupt *int32, env *environment) ([]types.S
 	amount := 0
 	for key, value := range pending {
 		if amount == 0 {
-			log.Info("tx poll txs", []interface{}{key, value}...)
-			// fmt.Println(key, value)
+			log.Info(fmt.Sprintf("tx poll txs: %s %v", key, value))
 		}
 		amount += 1
 	}
-	log.Info("amount of txs from tx pool", []interface{}{"v", amount})
+	log.Info(fmt.Sprintf("amount of txs from tx pool %v", amount))
 
 	localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
 	for _, account := range w.eth.TxPool().Locals() {
