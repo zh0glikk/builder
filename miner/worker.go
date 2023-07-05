@@ -583,10 +583,10 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			if w.isRunning() && (w.chainConfig.Clique == nil || w.chainConfig.Clique.Period > 0) {
 				// flashbots: disable this because there can be new bundles
 				// Short circuit if no new transaction arrives.
-				//if atomic.LoadInt32(&w.newTxs) == 0 {
+				// if atomic.LoadInt32(&w.newTxs) == 0 {
 				//	timer.Reset(recommit)
 				//	continue
-				//}
+				// }
 				commit(true, commitInterruptResubmit)
 			}
 
@@ -956,6 +956,7 @@ func (w *worker) updateSnapshot(env *environment) {
 }
 
 func (w *worker) commitTransaction(env *environment, tx *types.Transaction) ([]*types.Log, error) {
+	log.Info("committing tx", []interface{}{"hash", tx.Hash().String()})
 	gasPool := *env.gasPool
 	envGasUsed := env.header.GasUsed
 	stateDB := env.state
@@ -1007,6 +1008,7 @@ func (w *worker) commitTransaction(env *environment, tx *types.Transaction) ([]*
 }
 
 func (w *worker) commitBundle(env *environment, txs types.Transactions, interrupt *int32) error {
+	log.Info("committing bundle", []interface{}{"len", txs.Len()})
 	gasLimit := env.header.GasLimit
 	if env.gasPool == nil {
 		env.gasPool = new(core.GasPool).AddGas(gasLimit)
@@ -1272,7 +1274,7 @@ func (w *worker) prepareWork(genParams *generateParams) (*environment, error) {
 		return nil, err
 	}
 	// uncomment to enable dirty fix for clique coinbase for local builder
-	//header.Coinbase = genParams.coinbase
+	// header.Coinbase = genParams.coinbase
 
 	// Could potentially happen if starting to mine in an odd state.
 	// Note genParams.coinbase can be different with header.Coinbase
@@ -1329,6 +1331,17 @@ func (w *worker) fillTransactions(interrupt *int32, env *environment) ([]types.S
 	// Split the pending transactions into locals and remotes
 	// Fill the block with all available pending transactions.
 	pending := w.eth.TxPool().Pending(true)
+
+	amount := 0
+	for key, value := range pending {
+		if amount == 0 {
+			log.Info("tx poll txs", []interface{}{key, value}...)
+			// fmt.Println(key, value)
+		}
+		amount += 1
+	}
+	log.Info("amount of txs from tx pool", []interface{}{"v", amount})
+
 	localTxs, remoteTxs := make(map[common.Address]types.Transactions), pending
 	for _, account := range w.eth.TxPool().Locals() {
 		if txs := remoteTxs[account]; len(txs) > 0 {
@@ -1390,6 +1403,17 @@ func (w *worker) fillTransactionsAlgoWorker(interrupt *int32, env *environment) 
 	// Split the pending transactions into locals and remotes
 	// Fill the block with all available pending transactions.
 	pending := w.eth.TxPool().Pending(true)
+
+	amount := 0
+	for key, value := range pending {
+		if amount == 0 {
+			log.Info("tx poll txs", []interface{}{key, value}...)
+			// fmt.Println(key, value)
+		}
+		amount += 1
+	}
+	log.Info("amount of txs from tx pool", []interface{}{"v", amount})
+
 	bundlesToConsider, sbundlesToConsider, err := w.getSimulatedBundles(env)
 	if err != nil {
 		return nil, nil, nil, err
@@ -1479,6 +1503,7 @@ func (w *worker) generateWork(params *generateParams) (*types.Block, *big.Int, e
 
 	finalizeFn := func(env *environment, orderCloseTime time.Time,
 		blockBundles []types.SimulatedBundle, allBundles []types.SimulatedBundle, usedSbundles []types.UsedSBundle, noTxs bool) (*types.Block, *big.Int, error) {
+		log.Info("block finalize fn")
 		block, profit, err := w.finalizeBlock(env, params.withdrawals, validatorCoinbase, noTxs)
 		if err != nil {
 			log.Error("could not finalize block", "err", err)
@@ -1523,20 +1548,22 @@ func (w *worker) generateWork(params *generateParams) (*types.Block, *big.Int, e
 	orderCloseTime := time.Now()
 
 	blockBundles, allBundles, usedSbundles, err := w.fillTransactionsSelectAlgo(nil, work)
-
 	if err != nil {
 		return nil, nil, err
 	}
+	log.Info("fillTransactionsSelectAlgo applied")
 
 	// no bundles or tx from mempool
 	if len(work.txs) == 0 {
 		return finalizeFn(work, orderCloseTime, blockBundles, allBundles, usedSbundles, true)
 	}
 
+	log.Info("tx commit")
 	err = w.proposerTxCommit(work, &validatorCoinbase, paymentTxReserve)
 	if err != nil {
 		return nil, nil, err
 	}
+	log.Info("proposerTxCommit ok")
 
 	return finalizeFn(work, orderCloseTime, blockBundles, allBundles, usedSbundles, false)
 }
@@ -1742,6 +1769,7 @@ func (w *worker) generateFlashbotsBundle(env *environment, bundles []types.MevBu
 }
 
 func (w *worker) mergeBundles(env *environment, bundles []simulatedBundle, pendingTxs map[common.Address]types.Transactions) (types.Transactions, simulatedBundle, []types.SimulatedBundle, int, error) {
+	log.Info("worker")
 	mergedBundles := []types.SimulatedBundle{}
 	finalBundle := types.Transactions{}
 
