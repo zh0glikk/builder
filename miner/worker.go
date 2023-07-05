@@ -1317,8 +1317,11 @@ func (w *worker) fillTransactionsSelectAlgo(interrupt *int32, env *environment) 
 		blockBundles, allBundles, usedSbundles, err = w.fillTransactionsAlgoWorker(interrupt, env)
 	case ALGO_MEV_GETH:
 		blockBundles, allBundles, err = w.fillTransactions(interrupt, env)
+		log.Info("fillTransactions algo mev geth")
 	default:
 		blockBundles, allBundles, err = w.fillTransactions(interrupt, env)
+		log.Info("fillTransactions algo default???")
+
 	}
 	return blockBundles, allBundles, usedSbundles, err
 }
