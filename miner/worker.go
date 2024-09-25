@@ -1512,6 +1512,8 @@ func (w *worker) getSimulatedBundles(env *environment) ([]types.SimulatedBundle,
 	if len(bundles) == 0 && len(simBundles) == 0 && len(simSBundles) == 0 {
 		return nil, nil, errors.New(fmt.Sprintf("no mev bundles provided: bundles: %d simSBundles:%d simBundles:%d", len(bundles), len(simSBundles), len(simBundles)))
 	}
+	fmt.Println(fmt.Sprintf("found mev bundles: bundles: %d simSBundles:%d simBundles:%d", len(bundles), len(simSBundles), len(simBundles)))
+
 	ccBundles := <-ccBundlesCh
 	if ccBundles == nil {
 		return simBundles, simSBundles, nil
