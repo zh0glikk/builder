@@ -1500,6 +1500,9 @@ func (w *worker) getSimulatedBundles(env *environment) ([]types.SimulatedBundle,
 	}
 
 	bundles, ccBundlesCh := w.eth.TxPool().MevBundles(env.header.Number, env.header.Time)
+	if len(bundles) == 0 {
+		return nil, nil, errors.New("no mev bundles provided")
+	}
 	sbundles := w.eth.TxPool().GetSBundles(env.header.Number)
 
 	// TODO: consider interrupt
