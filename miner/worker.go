@@ -1507,6 +1507,8 @@ func (w *worker) getSimulatedBundles(env *environment) ([]types.SimulatedBundle,
 		return nil, nil, errors.New(fmt.Sprintf("no mev bundles provided: bundles: %d sbundles:%d", len(bundles), len(sbundles)))
 	}
 
+	fmt.Println(fmt.Sprintf("sbundles: %d", len(sbundles)))
+
 	//if len(bundles) == len(sbundles) {
 	//	return nil, nil, errors.New(fmt.Sprintf("bunble already simulated: bundles: %d sbundles:%d", len(bundles), len(sbundles)))
 	//}
