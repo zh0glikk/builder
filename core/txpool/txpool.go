@@ -527,7 +527,16 @@ func (p *TxPool) AddMevBundle(txs []*types.Transaction, blockNumber *big.Int, re
 
 	p.bundleLock.Lock()
 	defer p.bundleLock.Unlock()
-
+	fmt.Println(fmt.Sprintf("ADD MEV BUNDLE: %+v", types.MevBundle{
+		Txs:               txs,
+		BlockNumber:       blockNumber,
+		Uuid:              replacementUuid,
+		SigningAddress:    signingAddress,
+		MinTimestamp:      minTimestamp,
+		MaxTimestamp:      maxTimestamp,
+		RevertingTxHashes: revertingTxHashes,
+		Hash:              bundleHash,
+	}))
 	p.mevBundles = append(p.mevBundles, types.MevBundle{
 		Txs:               txs,
 		BlockNumber:       blockNumber,
