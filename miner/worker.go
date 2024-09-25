@@ -1399,8 +1399,8 @@ func (w *worker) fillTransactionsAlgoWorker(interrupt *atomic.Int32, env *enviro
 	}
 	// Split the pending transactions into locals and remotes
 	// Fill the block with all available pending transactions.
-	pending := w.eth.TxPool().Pending(filter)
-	//pending := make(map[common.Address][]*txpool.LazyTransaction)
+	//pending := w.eth.TxPool().Pending(filter)
+	pending := make(map[common.Address][]*txpool.LazyTransaction)
 	mempoolTxHashes := make(map[common.Hash]struct{}, len(pending))
 	for _, txs := range pending {
 		for _, tx := range txs {
@@ -1501,9 +1501,9 @@ func (w *worker) getSimulatedBundles(env *environment) ([]types.SimulatedBundle,
 	}
 
 	bundles, ccBundlesCh := w.eth.TxPool().MevBundles(env.header.Number, env.header.Time)
-	//if len(bundles) == 0 {
-	//	return nil, nil, errors.New(fmt.Sprintf("no mev bundles provided: bundles: %d", len(bundles)))
-	//}
+	if len(bundles) == 0 {
+		return nil, nil, errors.New(fmt.Sprintf("no mev bundles provided: bundles: %d", len(bundles)))
+	}
 	sbundles := w.eth.TxPool().GetSBundles(env.header.Number)
 
 	// TODO: consider interrupt
