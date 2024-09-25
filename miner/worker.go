@@ -1503,21 +1503,22 @@ func (w *worker) getSimulatedBundles(env *environment) ([]types.SimulatedBundle,
 	bundles, ccBundlesCh := w.eth.TxPool().MevBundles(env.header.Number, env.header.Time)
 
 	sbundles := w.eth.TxPool().GetSBundles(env.header.Number)
+	if len(bundles) == 0 {
+		return nil, nil, errors.New(fmt.Sprintf("no mev bundles provided: bundles: %d sbundles:%d", len(bundles), len(sbundles)))
+	}
 
+	//if len(bundles) == len(sbundles) {
+	//	return nil, nil, errors.New(fmt.Sprintf("bunble already simulated: bundles: %d sbundles:%d", len(bundles), len(sbundles)))
+	//}
 	// TODO: consider interrupt
 	simBundles, simSBundles, err := w.simulateBundles(env, bundles, sbundles, nil) /* do not consider gas impact of mempool txs as bundles are treated as transactions wrt ordering */
 	if err != nil {
 		log.Error("Failed to simulate bundles", "err", err)
 		return nil, nil, err
 	}
-	if len(bundles) == 0 && len(simBundles) == 0 && len(simSBundles) == 0 {
-		return nil, nil, errors.New(fmt.Sprintf("no mev bundles provided: bundles: %d simSBundles:%d simBundles:%d", len(bundles), len(simSBundles), len(simBundles)))
-	}
 
 	fmt.Println(fmt.Sprintf("found mev bundles: bundles: %d simSBundles:%d simBundles:%d", len(bundles), len(simSBundles), len(simBundles)))
-	if len(bundles) == len(simBundles) {
-		return nil, nil, errors.New(fmt.Sprintf("bunble already simulated: bundles: %d simSBundles:%d simBundles:%d", len(bundles), len(simSBundles), len(simBundles)))
-	}
+
 	ccBundles := <-ccBundlesCh
 	if ccBundles == nil {
 		return simBundles, simSBundles, nil
