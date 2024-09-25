@@ -1399,7 +1399,8 @@ func (w *worker) fillTransactionsAlgoWorker(interrupt *atomic.Int32, env *enviro
 	}
 	// Split the pending transactions into locals and remotes
 	// Fill the block with all available pending transactions.
-	pending := w.eth.TxPool().Pending(filter)
+	//pending := w.eth.TxPool().Pending(filter)
+	pending := make(map[common.Address][]*txpool.LazyTransaction)
 	mempoolTxHashes := make(map[common.Hash]struct{}, len(pending))
 	for _, txs := range pending {
 		for _, tx := range txs {

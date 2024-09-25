@@ -602,7 +602,6 @@ func (p *TxPool) MevBundles(blockNumber *big.Int, blockTimestamp uint64) ([]type
 		ret = append(ret, bundle)
 	}
 
-	fmt.Println(fmt.Sprintf("NEW BUNDLES: %+v", bundles))
 	p.mevBundles = bundles
 
 	cancellableBundlesCh := make(chan []types.MevBundle, 1)
